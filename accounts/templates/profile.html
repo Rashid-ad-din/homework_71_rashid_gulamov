@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Пользователь{% endblock %}
+
+{% block menu %}
+    {% if user == user_obj %}
+        <li><a href="{% url 'change' user_obj.pk %}">Редактировать</a></li>
+        <li><a href="#">Смена пароля</a></li>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div style="padding-left: 300px;">
+        <div class="d-flex">
+
+            <div>
+                {% if user.avatar %}
+                    <div>
+                        <img src="{{ user.avatar.url }}" alt="" style="height: 150px; width: 150px;"
+                             class="me-3 rounded-circle">
+                    </div>
+                {% else %}
+                    <div>
+                        <img src="{% static "profile/empty.png" %}" alt="" style="height: 150px; width: 150px;"
+                             class="me-3 rounded-circle">
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="ms-3 ps-3 d-flex flex-column">
+                <div class="d-flex">
+                    <p>
+                    <h1>{{ user_obj.get_full_name|default:user_obj.username }}</h1></p>
+                    {% if user == user_obj %}
+                        <p><a href="{% url 'change' user.pk %}"
+                              class="btn btn-light mt-2 ms-3">
+                            Редактировать профиль</a></p>
+                    {% else %}
+                        {% if user_obj not in user.subscriptions.all %}
+                            <form action="" method="get">
+                                <input type="hidden" name="subscribe_to" value="{{ user_obj.pk }}">
+                                <input type="submit" value="Подписаться"
+                                       class="btn btn-primary mt-2 ms-3">
+                            </form>
+                        {% else %}
+                            <form action="" method="get">
+                                <input type="hidden" name="subscribe_of" value="{{ user_obj.pk }}">
+                                <input type="submit" value="Отписаться"
+                                       class="btn btn-light mt-2 ms-3">
+                            </form>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <div class="d-flex">
+                    {% if user == user_obj %}
+                        <p class="me-5">Публикации: {{ user.posts.all.count }}</p>
+                        <p class="me-5">Подписки: {{ own_subscribes }}</p>
+                        <p class="me-5">Подписчики: {{ own_subscribers }}</p>
+                    {% else %}
+                        <p class="me-5">Публикации: {{ user_obj.posts.all.count }}</p>
+                        <p class="me-5">Подписки: {{ some_subscribes }}</p>
+                        <p class="me-5">Подписчики: {{ some_subscribers }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <p class="p-0 m-0 fw-bold">{{ user_obj.username }}</p>
+                    <p class="p-0 m-0">{{ user_obj.user_info }}</p>
+                </div>
+
+            </div>
+        </div>
+
+
+        <div style="margin-left: -270px; margin-top: 50px;" class="border-top">
+            {% include 'posts.html' %}
+        </div>
+
+    </div>
+{% endblock %}
