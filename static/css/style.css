@@ -1,0 +1,17 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Century Schoolbook", Verdana, Arial, sans-serif;
+}
+
+.own_container {
+    max-width: 550px;
+    width: 500px;
+    margin-left: 150px;
+    margin-right: 150px;
+    padding-right: 150px;
+}
