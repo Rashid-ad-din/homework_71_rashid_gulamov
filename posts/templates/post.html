@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    Post - {{ post.description }}
+{% endblock %}
+
+{% block content %}
+
+
+    <div style="padding-left: 300px;">
+        <div class="d-flex flex-column">
+
+            <div class="border" style="width: 650px;">
+                <div class="p-2 d-flex">
+                    {% if post.author.avatar %}
+                        <div>
+                            <img src="{{ post.author.avatar.url }}" alt="" style="height: 35px; width: 35px;"
+                                 class="me-3 rounded-circle">
+                        </div>
+                    {% else %}
+                        <div>
+                            <img src="{% static "profile/empty.png" %}" alt="" style="height: 35px; width: 35px;"
+                                 class="me-3 rounded-circle">
+                        </div>
+                    {% endif %}
+                    <div class="pt-1">
+                        <a href="{% url 'profile' post.author.pk %}"
+                           class="pe-3 text-decoration-none text-dark fw-bold">{{ post.author.login }}</a>
+                    </div>
+                    {% if post.author != user and post.author not in user.subscriptions.all %}
+                        <form action="" method="get">
+                            <input type="hidden" name="subscribe_to" value="{{ post.author.pk }}">
+                            <input type="submit" value="Подписаться" class="btn btn-primary">
+                        </form>
+                    {% endif %}
+
+                    {% if post.author != user and post.author in user.subscriptions.all %}
+                        <form action="" method="get">
+                            <input type="hidden" name="subscribe_of" value="{{ post.author.pk }}">
+                            <input type="submit" value="Отписаться" class="btn btn-light">
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="border" style="width: 650px;">
+                <img src="{{ post.image.url }}" width="650" height="550" alt="post picture">
+            </div>
+
+            <div class="border p-2" style="width: 650px;">
+                {% if user not in post.user_likes.all %}
+                    <form action="" method="get">
+                        <input type="hidden" name="like" value="{{ post.pk }}">
+                        <input type="submit" value=""
+                               style="background-image: url('{% static "likes/like.png" %}'); background-size: contain;
+                                       background-repeat: no-repeat; width: 100px; height: 35px;"
+                               class="border-0 bg-white">
+                    </form>
+                {% else %}
+                    <form action="" method="get">
+                        <input type="hidden" name="unlike" value="{{ post.pk }}">
+                        <input type="submit" value=""
+                               style="background-image: url('{% static "likes/unlike.png" %}'); background-size: contain;
+                                       background-repeat: no-repeat; width: 39px; height: 32px  ;"
+                               class="border-0">
+                    </form>
+                {% endif %}
+
+                <p class="mt-3">
+                    <span class="me-3">{{ post.user_likes.count }} отметок "Нравится"</span>
+                    <span>Комментарии: {{ post.comments.count }}</span>
+                </p>
+
+                <form action="{% url 'add_comment' user.pk post.pk %}" method="post" style="margin-bottom: 30px;">
+                    {% csrf_token %}
+                    <p style="height: 85px;" class="mb-0">
+                        {% for field in comment_form %}
+                            <label class="align-top">{{ field.label }}</label>
+                            {{ field }}
+                        {% endfor %}
+                        <input type="submit" value="Опубликовать"
+                               class="border-0 bg-white text-info fw-bold rounded align-middle"
+                               style="margin-left: -130px; margin-bottom: 100px;">
+                    </p>
+                </form>
+
+                <p class="col-12 text-break">
+                    <b>{{ post.author }}</b> {{ post.description }}
+                </p>
+                {% for comment in post.comments.all %}
+                    <p class="col-12 text-break">
+                        <b>{{ comment.author }}</b> {{ comment.text }}
+                    </p>
+                {% endfor %}
+            </div>
+
+        </div>
+
+
+    </div>
+{% endblock %}

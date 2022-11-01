@@ -1,0 +1,20 @@
+{% load django_bootstrap5 %}
+
+{% block content %}
+
+    <div class="d-flex flex-row flex-wrap" style="padding-left: 145px;">
+        {% for post in posts %}
+
+            <div class="m-3">
+                <a href="{% url 'profile_post' post.author.pk post.pk %}">
+                    <img src="{{ post.image.url }}" width="293"
+                         height="293" alt="user picture">
+                </a>
+            </div>
+
+        {% empty %}
+        {% endfor %}
+    </div>
+{% endblock %}
+
+
