@@ -78,3 +78,9 @@ class CommentCreateView(CreateView):
             comment.save()
             return redirect('profile_post', user_pk, post_pk)
         return redirect('profile_post', user_pk, post_pk)
+
+
+class LikesView(DetailView):
+    template_name = 'likes.html'
+    model = Post
+    context_object_name = 'post'

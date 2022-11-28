@@ -101,7 +101,7 @@ class UserChangeView(UpdateView):
 
 
 class ProfilesView(ListView):
-    template_name = 'profiles.html'
+    template_name = 'profiles_main.html'
     model = get_user_model()
     context_object_name = 'profiles'
     queryset = Account.objects.all()

@@ -49,26 +49,15 @@
             </div>
 
             <div class="border p-2" style="width: 650px;">
-                {% if user not in post.user_likes.all %}
-                    <form action="" method="get">
-                        <input type="hidden" name="like" value="{{ post.pk }}">
-                        <input type="submit" value=""
-                               style="background-image: url('{% static "likes/like.png" %}'); background-size: contain;
-                                       background-repeat: no-repeat; width: 100px; height: 35px;"
-                               class="border-0 bg-white">
-                    </form>
-                {% else %}
-                    <form action="" method="get">
-                        <input type="hidden" name="unlike" value="{{ post.pk }}">
-                        <input type="submit" value=""
-                               style="background-image: url('{% static "likes/unlike.png" %}'); background-size: contain;
-                                       background-repeat: no-repeat; width: 39px; height: 32px  ;"
-                               class="border-0">
-                    </form>
-                {% endif %}
+                <div id="likes_box">
+
+                </div>
 
                 <p class="mt-3">
-                    <span class="me-3">{{ post.user_likes.count }} отметок "Нравится"</span>
+                    <span id="user_likes">
+                        {{ post.user_likes.count }} отметок
+                    </span>
+                    <a href="{% url 'post_likes' user.pk post.pk %}" class="text-dark me-3" id="href">"Нравится"</a>
                     <span>Комментарии: {{ post.comments.count }}</span>
                 </p>
 
@@ -99,4 +88,224 @@
 
 
     </div>
+{% endblock %}
+
+{% block script %}
+    <script src="https://code.jquery.com/jquery-3.6.1.min.js"
+            integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"
+            integrity="sha256-lSjKY0/srUM9BE3dPm+c4fBo1dky2v27Gdjm2uoZaL0=" crossorigin="anonymous"></script>
+    <script>
+        let create_unliked = function () {
+            let like_button = document.createElement('button');
+            like_button.id = 'unliked';
+            like_button.style.backgroundImage = 'url("{% static "likes/unliked.png" %}")';
+            like_button.style.backgroundSize = 'contain';
+            like_button.style.backgroundRepeat = 'no-repeat';
+            like_button.style.width = '34px';
+            like_button.style.height = '31px';
+            like_button.classList.add('border-0');
+            return like_button;
+        }
+
+        let create_liked = function () {
+            let like_button = document.createElement('button');
+            like_button.id = 'liked';
+            like_button.style.backgroundImage = 'url("{% static "likes/liked.png" %}")';
+            like_button.style.backgroundSize = 'contain';
+            like_button.style.backgroundRepeat = 'no-repeat';
+            like_button.style.width = '33px';
+            like_button.style.height = '27px';
+            like_button.classList.add('border-0');
+            return like_button;
+        }
+
+        let user_likes_start_count =
+        {{ post.user_likes.count }}
+    </script>
+    {% if user not in post.user_likes.all %}
+        <script>
+            window.addEventListener('load', function () {
+                let likes_box = document.getElementById('likes_box');
+
+                let like_button = create_unliked();
+                likes_box.appendChild(like_button);
+
+                let add_like = $('#unliked')
+
+                let unlike = function (evt) {
+                    let url = 'http://localhost:8000/api/unlike/'
+
+                    $.ajax({
+                        url: url,
+                        method: 'get',
+                        data: {
+                            "post_pk": {{ post.pk }},
+                            "account_pk": {{ user.pk }}
+                        },
+                        success: function (data, status) {
+                            console.log(data);
+                            console.log(status);
+
+                            let destroy = document.getElementById('liked');
+                            destroy.remove();
+
+                            let like_button = create_unliked();
+
+                            likes_box.appendChild(like_button);
+
+                            let add_like = $('#unliked')
+
+                            add_like.on('click', like);
+
+                            let user_likes_count = document.getElementById('user_likes');
+                            user_likes_count.innerText;
+                            console.log(user_likes_count)
+
+                            user_likes_start_count -= 1;
+                            user_likes_count.innerText = `${user_likes_start_count} отметок`;
+
+                        },
+                        error: function (response, status) {
+                            console.log(status);
+                            console.log(response);
+                        }
+                    });
+                };
+
+                let like = function (evt) {
+                    let url = 'http://localhost:8000/api/like/'
+
+                    $.ajax({
+                        url: url,
+                        method: 'get',
+                        data: {
+                            "post_pk": {{ post.pk }},
+                            "account_pk": {{ user.pk }}
+                        },
+                        success: function (data, status) {
+                            console.log(data);
+                            console.log(status);
+
+                            let destroy = document.getElementById('unliked');
+                            destroy.remove();
+
+                            let like_button = create_liked();
+                            likes_box.appendChild(like_button);
+
+                            let remove_like = $('#liked')
+
+                            remove_like.on('click', unlike);
+
+                            let user_likes_count = document.getElementById('user_likes');
+
+                            user_likes_start_count += 1;
+                            user_likes_count.innerText = `${user_likes_start_count} отметок`;
+
+                        },
+                        error: function (response, status) {
+                            console.log(status);
+                            console.log(response);
+                        }
+                    });
+                };
+
+                add_like.on('click', like);
+
+            })
+        </script>
+
+    {% else %}
+
+        <script>
+            window.addEventListener('load', function () {
+                let likes_box = document.getElementById('likes_box');
+
+                let like_button = create_liked();
+                likes_box.appendChild(like_button);
+
+                let remove_like = $('#liked')
+
+                let unlike = function (evt) {
+                    let url = 'http://localhost:8000/api/unlike/'
+
+                    $.ajax({
+                        url: url,
+                        method: 'get',
+                        data: {
+                            "post_pk": {{ post.pk }},
+                            "account_pk": {{ user.pk }}
+                        },
+                        success: function (data, status) {
+                            console.log(data);
+                            console.log(status);
+
+                            let destroy = document.getElementById('liked');
+                            destroy.remove();
+
+                            let like_button = create_unliked();
+
+                            likes_box.appendChild(like_button);
+
+                            let add_like = $('#unliked');
+
+                            add_like.on('click', like);
+
+                            let user_likes_count = document.getElementById('user_likes');
+
+                            user_likes_start_count -= 1;
+                            user_likes_count.innerText = `${user_likes_start_count} отметок`;
+
+                        },
+                        error: function (response, status) {
+                            console.log(status);
+                            console.log(response);
+                        }
+                    });
+                };
+
+                let like = function (evt) {
+                    let url = 'http://localhost:8000/api/like/'
+
+                    $.ajax({
+                        url: url,
+                        method: 'get',
+                        data: {
+                            "post_pk": {{ post.pk }},
+                            "account_pk": {{ user.pk }}
+                        },
+                        success: function (data, status) {
+                            console.log(data);
+                            console.log(status);
+
+                            let destroy = document.getElementById('unliked');
+                            destroy.remove();
+
+                            let like_button = create_liked();
+                            likes_box.appendChild(like_button);
+
+                            let remove_like = $('#liked');
+
+                            remove_like.on('click', unlike);
+
+                            let user_likes_count = document.getElementById('user_likes');
+
+                            user_likes_start_count += 1;
+                            user_likes_count.innerText = `${user_likes_start_count} отметок`;
+
+                        },
+                        error: function (response, status) {
+                            console.log(status);
+                            console.log(response);
+                        }
+                    });
+                };
+
+                remove_like.on('click', unlike);
+
+            })
+        </script>
+
+    {% endif %}
+
 {% endblock %}
