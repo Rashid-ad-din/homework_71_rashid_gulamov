@@ -1,10 +1,13 @@
+from django.core.handlers.wsgi import WSGIRequest
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, BasePermission
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api.serializers import PostSerializer, CommentSerializer
+from accounts.models import Account
+from api.serializers import PostSerializer
 from posts.models import Post
 
 
@@ -46,3 +49,45 @@ class PostView(ModelViewSet):
         instance = get_object_or_404(Post, pk=pk)
         instance.delete()
         return Response(data={'result': 'Deleted successfully'}, status=status.HTTP_200_OK)
+
+
+def like(request: WSGIRequest, *args, **kwargs):
+    post_pk = request.GET.get('post_pk')
+    account_pk = request.GET.get('account_pk')
+    post = get_object_or_404(Post, pk=post_pk)
+    account = get_object_or_404(Account, pk=account_pk)
+    if post and account:
+        post.user_likes.add(account.pk)
+        response_data = {
+            'result': 'The post has been successfully liked'
+        }
+        response = JsonResponse(response_data)
+        response.status_code = 200
+        return response
+    response_data = {
+        'error': "Wrong request"
+    }
+    response = JsonResponse(response_data)
+    response.status_code = 400
+    return response
+
+
+def unlike(request: WSGIRequest, *args, **kwargs):
+    post_pk = request.GET.get('post_pk')
+    account_pk = request.GET.get('account_pk')
+    post = get_object_or_404(Post, pk=post_pk)
+    account = get_object_or_404(Account, pk=account_pk)
+    if post and account:
+        post.user_likes.remove(account.pk)
+        response_data = {
+            'result': 'The like has been successfully removed from post'
+        }
+        response = JsonResponse(response_data)
+        response.status_code = 200
+        return response
+    response_data = {
+        'error': "Wrong request"
+    }
+    response = JsonResponse(response_data)
+    response.status_code = 400
+    return response
