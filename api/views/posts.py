@@ -2,7 +2,7 @@ from django.core.handlers.wsgi import WSGIRequest
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
@@ -22,7 +22,7 @@ class IsAllowed(BasePermission):
 
 
 class PostView(ModelViewSet):
-    permission_classes = [IsAllowed]
+    permission_classes = [IsAuthenticated, IsAllowed]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
@@ -31,7 +31,7 @@ class PostView(ModelViewSet):
         PostSerializer.author = author
         serializer = PostSerializer(data=request.data)
         if serializer.is_valid():
-            post = serializer.save()
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

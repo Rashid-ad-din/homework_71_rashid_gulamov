@@ -2,10 +2,12 @@ from django.urls import include, path
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
 
-from api.views import PostView, like, unlike
+from api.views.comments import CommentView
+from api.views.posts import unlike, like, PostView
 
 router = routers.DefaultRouter()
 router.register('posts', PostView)
+router.register('comments', CommentView)
 
 app_name = 'api'
 
